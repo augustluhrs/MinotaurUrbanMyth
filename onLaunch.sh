@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 #onLaunch.sh
-cd ~/Minotaur
+cd /home/august/Minotaur
 eval "$(ssh-agent -s)"
-ssh-add ~/.ssh/id_rsa
-source ~/.env/bin/activate
+ssh-add /home/august/.ssh/id_rsa
+source /home/august/.env/bin/activate
 python3 -O maskDemo.py
 

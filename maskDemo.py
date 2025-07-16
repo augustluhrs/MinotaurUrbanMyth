@@ -40,15 +40,17 @@ cv.namedWindow("labyrinth", cv.WND_PROP_FULLSCREEN)
 cv.setWindowProperty("labyrinth", cv.WND_PROP_FULLSCREEN, cv.WINDOW_FULLSCREEN)
 
 flickerProb = 0.033
-flickerDuration = 1
+flickerDuration = 3
 
 faceStates = {}
 
 lastAction = 0
-actionTimeout = 5
+actionTimeout = 1 #trying much snappier timeout now, not immediate tho just to be safe
+#now going to just default to rend as an overriding trigger, friend dance is rarer, only when all are friend
 
 (textW, textH), baseline = cv.getTextSize("FRIEND", cv.FONT_HERSHEY_SIMPLEX, 1, 2)
 
+# tries to keep the same label on each individual face
 def get_closest_face_id(x, y, faceStates, max_dist=50):
 	for fid, state in faceStates.items():
 		fx, fy = fid
@@ -77,6 +79,8 @@ while True:
 
 #	shouldSendIcky = False
 
+	allFriends = True
+
 	for (x, y, w, h) in faces:
 
 		centerX, centerY = x + w//2, y + h//2
@@ -90,6 +94,7 @@ while True:
 			if currentTime - state['startTime'] > flickerDuration:
 				state['isFlickering'] = False
 			else:
+				allFriends = False #if any are in rend, wont send dance
 				cv.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255))
 				cv.putText(frame, "REND", (textX, y-(h//10)), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2, cv.LINE_AA)
 		else:
@@ -99,15 +104,20 @@ while True:
 				cv.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255))
 				cv.putText(frame, "REND", (textX, y-(h//10)), cv.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2, cv.LINE_AA)
 				#shouldSendIcky = True
-				if (currentTime - lastAction > actionTimeout):
-					mqttc.publish("hexapod", 1)
-					lastAction = currentTime
+				# if (currentTime - lastAction > actionTimeout):
+				mqttc.publish("hexapod", 1)
+				lastAction = currentTime
 			else:
 				cv.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0))
 				cv.putText(frame, "FRIEND", (textX, y-(h//10)), cv.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2, cv.LINE_AA)
-				if (currentTime - lastAction > actionTimeout):
-					mqttc.publish("hexapod", 2) #hmmmmmmmmmm
-					lastAction = currentTime
+				# if (currentTime - lastAction > actionTimeout):
+					# mqttc.publish("hexapod", 2) #hmmmmmmmmmm
+					# lastAction = currentTime
+
+		#if all friend and timeout, send dance
+		if allFriends == True and currentTime - lastAction > actionTimeout:
+			mqttc.publish("hexapod", 2)
+			lastAction = currentTime
 
 		updatedFaceStates[(centerX, centerY)] = state
 
