@@ -114,11 +114,6 @@ while True:
 					# mqttc.publish("hexapod", 2) #hmmmmmmmmmm
 					# lastAction = currentTime
 
-		#if all friend and timeout, send dance
-		if allFriends == True and currentTime - lastAction > actionTimeout:
-			mqttc.publish("hexapod", 2)
-			lastAction = currentTime
-
 		updatedFaceStates[(centerX, centerY)] = state
 
 #		cv.rectangle(gray, (x, y), (x+w, y+h), (0, 255, 0))
@@ -126,6 +121,11 @@ while True:
 		#cv.putText(frame, "FRIEND", (x, y-(h//10)), cv.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2, cv.LINE_AA)
 #		cv.putText(frame, "FRIEND", (x, y-10), cv.FONT_HERSHEY_SIMPLEX, 2, (0,255,0), 2, cv.LINE_AA)
 #		cv.putText(gray, "FRIEND", (x, y-10), cv.FONT_HERSHEY_SIMPLEX, 2, (0,255,0), 2, cv.LINE_AA)
+
+	#if all friend and timeout, send dance
+	if allFriends == True and currentTime - lastAction > actionTimeout:
+		mqttc.publish("hexapod", 2)
+		lastAction = currentTime
 
 	faceStates = {
 		fid: state for fid, state in updatedFaceStates.items()
