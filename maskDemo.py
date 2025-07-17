@@ -123,7 +123,7 @@ while True:
 #		cv.putText(gray, "FRIEND", (x, y-10), cv.FONT_HERSHEY_SIMPLEX, 2, (0,255,0), 2, cv.LINE_AA)
 
 	#if all friend and timeout, send dance
-	if allFriends == True and currentTime - lastAction > actionTimeout:
+	if len(faces) > 0 and allFriends == True and currentTime - lastAction > actionTimeout:
 		mqttc.publish("hexapod", 2)
 		lastAction = currentTime
 
